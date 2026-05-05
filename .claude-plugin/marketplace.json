@@ -1,0 +1,16 @@
+{
+  "name": "bitbucket-automation",
+  "description": "Bitbucket PR automation for Claude Code — commit staged changes and create pull requests via MCP without exposing credentials.",
+  "owner": {
+    "name": "Cesar Lata",
+    "url": "https://github.com/cess15"
+  },
+  "plugins": [
+    {
+      "name": "bitbucket-automation",
+      "description": "Bitbucket PR automation via MCP. Provides /bitbucket-workflow command (auto/safe modes), bitbucket-agent, and SessionStart dependency check for caveman-commit.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "bitbucket-automation",
+  "description": "Bitbucket PR automation for Claude Code. Commits staged changes and creates pull requests via MCP. Provides /bitbucket-workflow command (auto/safe modes) and bitbucket-agent. Requires caveman plugin for commit message generation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Cesar Lata",
+    "url" : "https://github.com/cess15/"
+  },
+  "license": "MIT"
+}

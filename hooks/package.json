@@ -1,0 +1,10 @@
+{
+  "name": "bitbucket-automation-hooks",
+  "version": "1.0.0",
+  "description": "SessionStart hooks for bitbucket-automation Claude Code plugin",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "MIT"
+}

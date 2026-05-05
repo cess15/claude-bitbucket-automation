@@ -1,0 +1,15 @@
+{
+  "description": "bitbucket-automation dependency check on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-deps.js\""
+          }
+        ]
+      }
+    ]
+  }
+}
