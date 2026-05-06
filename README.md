@@ -22,7 +22,7 @@ Claude Code plugin — commit staged changes and create Bitbucket pull requests 
 ## Installation
 
 ```bash
-claude plugin install cess15/bitbucket-automation
+claude plugin marketplace add cess15/claude-bitbucket-automation && claude plugin install bitbucket-automation@bitbucket-automation
 ```
 
 ## Usage
