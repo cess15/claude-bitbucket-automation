@@ -42,6 +42,7 @@ Flow:
 - **NEVER squash, reset, or rewrite** git history
 - **NEVER ask user anything before showing full preview** — gather all context first, present plan in one shot
 - **NEVER use Bitbucket API or git to detect target branch** — `<target-branch>` comes ONLY from user's message; if absent, always `develop` (never `master`)
+- **NEVER run bare `git status` or unscoped `git diff`** (no `--cached`, no pathspec, no commit range) — on large repos with `text=auto` line-ending normalization this rescans every tracked file and can hang for minutes on slow filesystems (e.g. WSL `/mnt/c` mounts). The commands in Step 1 (`--cached`, `--name-only`, commit ranges) are sufficient — never add a full-tree scan to "double check" state.
 
 ---
 
@@ -99,6 +100,8 @@ git log origin/<source-branch>..HEAD --oneline 2>/dev/null
 ```
 
 If `git rev-parse` outputs `__NO_REMOTE_TRACKING__`, treat branch as new on remote → push will use `git push -u origin <source-branch>`. Run the `git log` only when remote ref exists.
+
+Do not run any additional git command beyond this list to "confirm" state — in particular never run bare `git status` or `git diff` without `--cached`/a pathspec. On repos with `text=auto` in `.gitattributes` this forces a full working-tree rescan and can hang for minutes on slow filesystems.
 
 From remote URL, extract:
 - `<workspace>` and `<repo>` from `git@bitbucket.org:<workspace>/<repo>.git`

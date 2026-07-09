@@ -84,6 +84,8 @@ Extract `<workspace>` and `<repo>` from the remote URL.
 
 If `git rev-parse` outputs `__NO_REMOTE_TRACKING__`, treat branch as new on remote → push will use `git push -u origin <SOURCE>`. Run the `git log` only when remote ref exists.
 
+Do not run any additional git command beyond this list to "confirm" state — in particular never run bare `git status` or `git diff` without `--cached`/a pathspec. On repos with `text=auto` in `.gitattributes` this forces a full working-tree rescan and can hang for minutes on slow filesystems (e.g. WSL `/mnt/c` mounts).
+
 ### Step 2 — Fetch PR data and default reviewers (MCP optional)
 
 Check session context for `BITBUCKET_AUTOMATION_MCP`:
