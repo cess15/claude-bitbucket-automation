@@ -70,6 +70,8 @@ git diff --cached --stat
 git diff --cached --name-only
 git branch --show-current
 git remote get-url origin
+git config user.name
+git config user.email
 git log origin/<TARGET>..<SOURCE> --oneline
 git log origin/<TARGET>..<SOURCE> --pretty=format:"%h %s%n%b"
 # Detect if branch has a remote tracking ref
@@ -95,13 +97,13 @@ Check session context for `BITBUCKET_AUTOMATION_MCP`:
 
 **Call A — existing open PRs:**
 
-Before building the `jq` expression, escape `<SOURCE>` and `<TARGET>` for embedding in a jq string: replace every `\` with `\\` and every `"` with `\"`.
+Before building the `jq` expression (which is actually JMESPath — see https://jmespath.org, not jq syntax), escape `<SOURCE>` and `<TARGET>` for embedding in the string: replace every `\` with `\\` and every `'` with `\'`.
 
 ```
 mcp__bitbucket__bb_get({
   path: "/repositories/<workspace>/<repo>/pullrequests",
   queryParams: { state: "OPEN", pagelen: "50" },
-  jq: "[.values[] | select(.source.branch.name == \"<escaped-SOURCE>\" and .destination.branch.name == \"<escaped-TARGET>\") | {id: .id, title: .title, url: .links.html.href}]"
+  jq: "values[?source.branch.name=='<escaped-SOURCE>' && destination.branch.name=='<escaped-TARGET>'].{id: id, title: title, url: links.html.href}"
 })
 ```
 
@@ -109,11 +111,12 @@ mcp__bitbucket__bb_get({
 ```
 mcp__bitbucket__bb_get({
   path: "/repositories/<workspace>/<repo>/default-reviewers",
-  jq: "[.values[] | {uuid: .uuid, name: .display_name}]"
+  jq: "values[*].{uuid: uuid, name: display_name}"
 })
 ```
 
 Store both results. Do not call bb_get again after this step.
+**Exclude the PR author from the reviewers list** — Bitbucket rejects PR creation if the author's own account is in `reviewers`. Match each reviewer's `name`/`display_name`/nickname against `git config user.name`/`user.email` from Step 1 and drop any match; it's expected the author is often also a default reviewer.
 If the reviewers list is empty, proceed without reviewers.
 
 ### Step 3 — Generate commit message (only if staged changes exist; skip if none)
