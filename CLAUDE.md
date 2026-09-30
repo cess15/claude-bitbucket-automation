@@ -18,6 +18,14 @@ Triggers: "create a PR", "open a pull request", "PR to \<branch\>", "commit and 
 |-------|-----------|
 | `bitbucket-agent` | Spawned by `bitbucket-workflow` skill in auto mode |
 
+## Skill provided
+
+| Skill | Role |
+|-------|------|
+| `pr-workflow` | Single source of the commit + PR flow. Invoked by the command (safe mode, inline) and by `bitbucket-agent` (auto mode) with args `<mode> <target-branch>`. |
+
+Provider-specific steps (`parse_remote`, `prefetch`, `create_pr`, `manual_fallback`) live in `skills/pr-workflow/providers/<provider>.md`. Change shared behavior in `SKILL.md`, never in the command or agent.
+
 ---
 
 ## Hard rules — always enforce

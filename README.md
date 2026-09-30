@@ -47,6 +47,16 @@ You can also trigger it naturally:
 | `auto` | Commit → push → create PR with no further prompts |
 | `safe` | Shows full plan, then confirms commit / push / PR one at a time |
 
+## Structure
+
+| Path | Role |
+|------|------|
+| `commands/bitbucket-workflow.md` | Parses args, asks for mode, runs safe mode inline or delegates auto mode to the agent |
+| `agents/bitbucket-agent.md` | Auto-mode subagent; loads the `pr-workflow` skill |
+| `skills/pr-workflow/SKILL.md` | Shared commit + push + PR workflow (single source of truth) |
+| `skills/pr-workflow/providers/bitbucket.md` | Bitbucket-specific operations: remote parsing, duplicate/reviewer lookup, PR creation, manual fallback |
+| `hooks/check-deps.js` | SessionStart dependency check |
+
 ## MCP configuration
 
 A SessionStart hook runs `hooks/check-deps.js` to detect whether the Bitbucket MCP server is configured. It scans these files in order:
