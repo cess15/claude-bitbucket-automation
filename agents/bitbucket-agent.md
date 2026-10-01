@@ -23,6 +23,9 @@ tools:
   - mcp__bitbucket__bb_post
   - mcp__github__list_pull_requests
   - mcp__github__create_pull_request
+  - mcp__github__get_me
+  - mcp__github__get_label
+  - mcp__github__issue_write
 model: claude-sonnet-4-6
 ---
 

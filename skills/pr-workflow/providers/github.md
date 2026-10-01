@@ -11,6 +11,9 @@ GitHub MCP server (remote `https://api.githubcopilot.com/mcp/`, or
 ```
 mcp__github__list_pull_requests   → find an open PR for the same head/base
 mcp__github__create_pull_request  → create the PR
+mcp__github__get_me               → login of the PR author, for the assignee
+mcp__github__get_label            → check a label exists before applying it
+mcp__github__issue_write          → set assignee and labels on the created PR
 ```
 
 MCP availability comes from the session context flag `BITBUCKET_AUTOMATION_GITHUB_MCP`:
@@ -81,7 +84,41 @@ If a path is printed, Read the first one and store its content as `<pr-template>
   ```
   Report: `✓ Pull request created: #<number> — <html_url>`
   If the call returns an error → run **manual_fallback** with the error header. Do NOT suggest curl, tokens, `gh`, or MCP config changes.
+
+  Then run **post_create**.
 - **`unavailable`** or host check failed → run **manual_fallback**.
+
+---
+
+## post_create
+
+Only after `create_pull_request` succeeded. `create_pull_request` accepts neither assignees nor labels, and a PR is an issue for these fields, so set them with `issue_write`.
+
+1. **Assignee** — `mcp__<server-name>__get_me()` → `<login>`.
+2. **Label** — from the type of `<pr-title>` (`<type>(<scope>): …` or `<type>!: …`):
+
+   | Type | Label |
+   |------|-------|
+   | `feat` | `enhancement` |
+   | `fix` | `bug` |
+   | `docs` | `documentation` |
+   | anything else | none |
+
+   If there is a label, `mcp__<server-name>__get_label({ owner, repo, name: "<label>" })`; if it fails (label missing in the repo), drop it.
+3. **Apply** — one call:
+   ```
+   mcp__<server-name>__issue_write({
+     method: "update",
+     owner: "<owner>",
+     repo: "<repo>",
+     issue_number: <number>,
+     assignees: ["<login>"],
+     labels: ["<label>"]
+   })
+   ```
+   Omit `labels` when there is none; skip the call if `get_me` failed and there is no label.
+
+Report: `✓ Assigned: <login> · Labels: <label or none>`. Any failure here is reported as a warning (`⚠️ PR created, but <step> failed: <error>`) — never retry `create_pull_request` and never fall back to the manual URL, the PR already exists.
 
 ---
 
