@@ -267,6 +267,31 @@ Cancelled. No changes were committed, pushed, or submitted.
 
 ---
 
+## PR page opener (used by provider manual_fallback)
+
+`${CLAUDE_SKILL_DIR}/scripts/open-pr.js` opens the provider's new-PR page in the browser, prefilled where the provider allows, and copies the description to the clipboard when it cannot travel in the URL. Pass every value on stdin through a quoted heredoc — never as shell arguments (branch names may contain `'`, `$`, `&`):
+
+```bash
+node "${CLAUDE_SKILL_DIR}/scripts/open-pr.js" <<'PR_AUTOMATION_EOF'
+provider=<github|bitbucket>
+host=<host>
+owner=<owner or workspace>
+repo=<repo>
+source=<source-branch>
+target=<target-branch>
+title=<pr-title>
+---
+<pr-description>
+PR_AUTOMATION_EOF
+```
+
+Report from its output lines:
+- `OPENED=yes:*` → `✓ PR form opened in browser: <URL>`; then by `PREFILLED`: `title,body` → `Title and description are filled in — review and click Create.`; `title` → `Title is filled in.`; `none` → print the title for copy-paste.
+- `CLIPBOARD=yes:*` → `Description copied to clipboard — paste it into the description field.`
+- `OPENED=no:*`, `CLIPBOARD=no:*` (when a copy was needed) or `ERROR=*` → print the provider's manual template below in full, so nothing is lost.
+
+---
+
 ## What this workflow does NOT do
 
 - ❌ Does not ask intermediate questions before showing plan

@@ -88,6 +88,8 @@ Store full list as `<reviewers>`. If empty, proceed without reviewers (don't err
 
 ## manual_fallback
 
+First run the **PR page opener** from SKILL.md with `provider=bitbucket`, `host=bitbucket.org`, `owner=<workspace>`, `repo=<repo>`, and report from its output. Print the template below only when the opener says so (or failed).
+
 Header: `PR ready — create it manually:` (or, after an MCP error: `The Bitbucket MCP tool returned an error. Create the PR manually:`)
 
 ```
