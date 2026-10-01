@@ -1,4 +1,4 @@
-# bitbucket-automation — developer guide
+# pr-automation — developer guide
 
 This file guides work **on this repository**. It is not shipped with the plugin:
 Claude Code loads it only when someone works inside this repo, never in the
@@ -15,9 +15,9 @@ components below. A rule written only here does not reach plugin users.
 |------|---------|------|
 | `skills/pr-workflow/SKILL.md` | yes | Single source of the commit + push + PR flow and its hard rules |
 | `skills/pr-workflow/providers/<provider>.md` | yes | Provider operations: `parse_remote`, `prefetch`, `create_pr`, `manual_fallback` |
-| `commands/bitbucket-workflow.md` | yes | Parses `[auto\|safe] [branch]`, asks for mode, runs safe mode inline, delegates auto mode to the agent |
-| `agents/bitbucket-agent.md` | yes | Auto-mode subagent; loads `bitbucket-automation:pr-workflow` |
-| `hooks/check-deps.js` | yes | SessionStart check; emits `BITBUCKET_AUTOMATION_MCP` and `BITBUCKET_AUTOMATION_CAVEMAN_COMMIT` |
+| `commands/create-pr.md` | yes | Parses `[auto\|safe] [branch]`, asks for mode, runs safe mode inline, delegates auto mode to the agent |
+| `agents/pr-agent.md` | yes | Auto-mode subagent; loads `pr-automation:pr-workflow` |
+| `hooks/check-deps.js` | yes | SessionStart check; emits `PR_AUTOMATION_BITBUCKET_MCP` and `PR_AUTOMATION_CAVEMAN_COMMIT` |
 | `.claude-plugin/plugin.json`, `marketplace.json` | yes | Manifest and marketplace entry |
 | `CLAUDE.md`, `README.md` | no | Development guide and user docs |
 
@@ -40,11 +40,11 @@ components below. A rule written only here does not reach plugin users.
 Load the working copy without installing it, from a directory outside this repo:
 
 ```bash
-claude -p --plugin-dir /path/to/bitbucket-automation "<prompt>"
+claude -p --plugin-dir /path/to/pr-automation "<prompt>"
 ```
 
 - Check registration: ask it to list skills and agents containing `pr-workflow` or `bitbucket`.
-- Run a flow end to end only with `/bitbucket-workflow` and no mode: it stops at the plan without committing, pushing or creating a PR.
+- Run a flow end to end only with `/create-pr` and no mode: it stops at the plan without committing, pushing or creating a PR.
 - `claude plugin validate .` validates the marketplace manifest.
 
 ---

@@ -1,5 +1,5 @@
 {
-  "description": "bitbucket-automation dependency check on session start",
+  "description": "pr-automation dependency check on session start",
   "hooks": {
     "SessionStart": [
       {

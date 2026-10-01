@@ -16,7 +16,7 @@ mcp__github__get_label            → check a label exists before applying it
 mcp__github__issue_write          → set assignee and labels on the created PR
 ```
 
-MCP availability comes from the session context flag `BITBUCKET_AUTOMATION_GITHUB_MCP`:
+MCP availability comes from the session context flag `PR_AUTOMATION_GITHUB_MCP`:
 - `available:<server-name>@<server-host>` → tools are `mcp__<server-name>__list_pull_requests` / `mcp__<server-name>__create_pull_request`
 - `unavailable` → no API calls; use **manual_fallback**
 

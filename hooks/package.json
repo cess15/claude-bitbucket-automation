@@ -1,7 +1,7 @@
 {
-  "name": "bitbucket-automation-hooks",
+  "name": "pr-automation-hooks",
   "version": "1.0.0",
-  "description": "SessionStart hooks for bitbucket-automation Claude Code plugin",
+  "description": "SessionStart hooks for pr-automation Claude Code plugin",
   "type": "commonjs",
   "engines": {
     "node": ">=16"
