@@ -70,6 +70,16 @@ function collectServers(data, projectDir) {
   return { ...(data.mcpServers || {}), ...(project.mcpServers || {}) };
 }
 
+// Remote GitHub MCP endpoints map to the git host they serve:
+// api.githubcopilot.com -> github.com, copilot-api.<sub>.ghe.com -> <sub>.ghe.com.
+function githubHost(val) {
+  let host;
+  try { host = new URL(val.url).hostname.toLowerCase(); } catch (e) { return 'unknown'; }
+  if (host === 'api.githubcopilot.com') return 'github.com';
+  const ghe = host.match(/^copilot-api\.([a-z0-9-]+)\.ghe\.com$/);
+  return ghe ? `${ghe[1]}.ghe.com` : 'unknown';
+}
+
 function findServer(servers, predicate) {
   const hit = Object.entries(servers).find(([key, val]) => predicate(key, val || {}));
   return hit ? hit[0] : null;
@@ -105,6 +115,7 @@ function main() {
   const servers = configuredServers(projectDir);
   const bitbucket = findServer(servers, isBitbucketServer);
   const github = findServer(servers, isGithubServer);
+  const githubServerHost = github ? githubHost(servers[github]) : null;
   const lines = [];
 
   if (!skillExists()) {
@@ -124,7 +135,7 @@ function main() {
   if (!github) {
     lines.push('BITBUCKET_AUTOMATION_GITHUB_MCP=unavailable');
   } else {
-    lines.push(`BITBUCKET_AUTOMATION_GITHUB_MCP=available:${github}`);
+    lines.push(`BITBUCKET_AUTOMATION_GITHUB_MCP=available:${github}@${githubServerHost}`);
   }
 
   console.log(lines.join('\n'));
@@ -132,4 +143,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { isBitbucketServer, isGithubServer, collectServers, findServer };
+module.exports = { isBitbucketServer, isGithubServer, collectServers, findServer, githubHost };

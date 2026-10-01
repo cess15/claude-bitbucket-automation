@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const {
-  isBitbucketServer, isGithubServer, collectServers, findServer,
+  isBitbucketServer, isGithubServer, collectServers, findServer, githubHost,
 } = require('../hooks/check-deps.js');
 
 test('detects Bitbucket server by key or package name', () => {
@@ -34,4 +34,11 @@ test('findServer returns the configured server name', () => {
   const servers = { Snyk: {}, 'vumi-github': { url: 'https://copilot-api.example.ghe.com/mcp/' } };
   assert.strictEqual(findServer(servers, isGithubServer), 'vumi-github');
   assert.strictEqual(findServer({}, isGithubServer), null);
+});
+
+test('githubHost maps remote MCP endpoints to their git host', () => {
+  assert.strictEqual(githubHost({ url: 'https://api.githubcopilot.com/mcp/' }), 'github.com');
+  assert.strictEqual(githubHost({ url: 'https://copilot-api.vumigroup.ghe.com/mcp/' }), 'vumigroup.ghe.com');
+  assert.strictEqual(githubHost({ command: 'github-mcp-server' }), 'unknown');
+  assert.strictEqual(githubHost({ url: 'https://evil.example.com/copilot-api.x.ghe.com/mcp' }), 'unknown');
 });
