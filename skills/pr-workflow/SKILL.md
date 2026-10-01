@@ -1,8 +1,8 @@
 ---
 name: pr-workflow
 description: >
-  Shared commit + pull request workflow used by /bitbucket-workflow and
-  bitbucket-agent. Commits staged changes, pushes the branch and creates the
+  Shared commit + pull request workflow used by /create-pr and
+  pr-agent. Commits staged changes, pushes the branch and creates the
   PR on Bitbucket or GitHub through the provider file. Invoke with arguments "<mode> <target-branch>"
   where mode is auto, safe or unset.
 allowed-tools: Bash Read mcp__bitbucket__bb_get mcp__github__list_pull_requests mcp__github__get_me mcp__github__get_label
@@ -96,7 +96,7 @@ Apply provider **prefetch**. It sets `<existing-pr>`, `<reviewers>` and, when th
 
 ## Step 3 — Generate commit message (only if staged changes exist)
 
-Check session context for `BITBUCKET_AUTOMATION_CAVEMAN_COMMIT`:
+Check session context for `PR_AUTOMATION_CAVEMAN_COMMIT`:
 
 - **`available`** → invoke caveman-commit skill to generate the message from `git diff --cached`
 - **`missing`** → generate inline from the diff:

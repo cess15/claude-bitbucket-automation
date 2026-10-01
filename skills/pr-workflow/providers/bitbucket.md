@@ -21,7 +21,7 @@ All paths relative (start with `/repositories/`). `/2.0` prefix added automatica
 
 **Token optimization — always use `jq` to filter responses.** Default TOON format uses 30–60% fewer tokens than JSON — keep as default. Always pass `jq` expression to extract only needed fields. Never request full response without `jq` filter.
 
-MCP availability comes from the session context flag `BITBUCKET_AUTOMATION_MCP` (`available` | `unavailable`), emitted by the plugin's SessionStart hook.
+MCP availability comes from the session context flag `PR_AUTOMATION_BITBUCKET_MCP` (`available` | `unavailable`), emitted by the plugin's SessionStart hook.
 
 ---
 
@@ -35,8 +35,8 @@ Extract `<workspace>` and `<repo>` from the `origin` URL:
 
 ## prefetch
 
-- **`BITBUCKET_AUTOMATION_MCP=unavailable`** → skip entirely. Set `<reviewers>=[]` and `<existing-pr>=none`.
-- **`BITBUCKET_AUTOMATION_MCP=available`** → make exactly TWO `bb_get` calls in parallel. Do NOT call `bb_get` again at any later step.
+- **`PR_AUTOMATION_BITBUCKET_MCP=unavailable`** → skip entirely. Set `<reviewers>=[]` and `<existing-pr>=none`.
+- **`PR_AUTOMATION_BITBUCKET_MCP=available`** → make exactly TWO `bb_get` calls in parallel. Do NOT call `bb_get` again at any later step.
 
 **Call A — existing open PRs:**
 
@@ -65,7 +65,7 @@ Store full list as `<reviewers>`. If empty, proceed without reviewers (don't err
 
 ## create_pr
 
-- **`BITBUCKET_AUTOMATION_MCP=available`** → call `mcp__bitbucket__bb_post`:
+- **`PR_AUTOMATION_BITBUCKET_MCP=available`** → call `mcp__bitbucket__bb_post`:
   ```
   mcp__bitbucket__bb_post({
     path: "/repositories/<workspace>/<repo>/pullrequests",
@@ -82,7 +82,7 @@ Store full list as `<reviewers>`. If empty, proceed without reviewers (don't err
   Omit `"reviewers"` key entirely if `<reviewers>` is empty.
   Report: `✓ Pull request created: #<id> — <pr-url>`
   If `bb_post` returns an error → run **manual_fallback** with the error header. Do NOT suggest curl, auth commands, or MCP config changes.
-- **`BITBUCKET_AUTOMATION_MCP=unavailable`** → run **manual_fallback**.
+- **`PR_AUTOMATION_BITBUCKET_MCP=unavailable`** → run **manual_fallback**.
 
 ---
 

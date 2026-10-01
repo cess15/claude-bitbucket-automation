@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// bitbucket-automation — SessionStart dependency check
+// pr-automation — SessionStart dependency check
 //
 // Checks: caveman-commit skill availability + Bitbucket and GitHub MCP configuration.
-// Emits status flags consumed by /bitbucket-workflow command and bitbucket-agent.
+// Emits status flags consumed by /create-pr command and pr-agent.
 // Non-blocking — workflow continues with fallbacks regardless of results.
 
 const fs = require('fs');
@@ -119,23 +119,23 @@ function main() {
   const lines = [];
 
   if (!skillExists()) {
-    lines.push('BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=missing');
-    lines.push('bitbucket-automation: caveman-commit skill not found — commit messages will be generated inline by the model (higher token cost, less consistency). To optimize: claude plugin install caveman@caveman');
+    lines.push('PR_AUTOMATION_CAVEMAN_COMMIT=missing');
+    lines.push('pr-automation: caveman-commit skill not found — commit messages will be generated inline by the model (higher token cost, less consistency). To optimize: claude plugin install caveman@caveman');
   } else {
-    lines.push('BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=available');
+    lines.push('PR_AUTOMATION_CAVEMAN_COMMIT=available');
   }
 
   if (!bitbucket) {
-    lines.push('BITBUCKET_AUTOMATION_MCP=unavailable');
-    lines.push('bitbucket-automation: Bitbucket MCP not configured — PR will be shown as a manual preview (copy-paste). Reviewers and duplicate PR checks will be skipped.');
+    lines.push('PR_AUTOMATION_BITBUCKET_MCP=unavailable');
+    lines.push('pr-automation: Bitbucket MCP not configured — for Bitbucket repos the PR will be shown as a manual preview (copy-paste), without reviewers or duplicate PR checks.');
   } else {
-    lines.push('BITBUCKET_AUTOMATION_MCP=available');
+    lines.push('PR_AUTOMATION_BITBUCKET_MCP=available');
   }
 
   if (!github) {
-    lines.push('BITBUCKET_AUTOMATION_GITHUB_MCP=unavailable');
+    lines.push('PR_AUTOMATION_GITHUB_MCP=unavailable');
   } else {
-    lines.push(`BITBUCKET_AUTOMATION_GITHUB_MCP=available:${github}@${githubServerHost}`);
+    lines.push(`PR_AUTOMATION_GITHUB_MCP=available:${github}@${githubServerHost}`);
   }
 
   console.log(lines.join('\n'));

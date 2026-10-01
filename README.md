@@ -1,13 +1,15 @@
-# bitbucket-automation
+# pr-automation
 
-Claude Code plugin — commit staged changes and create Bitbucket pull requests via MCP without exposing credentials.
+Claude Code plugin — commit staged changes and create Bitbucket or GitHub pull requests via MCP without exposing credentials.
+
+Formerly **bitbucket-automation** — see [Migrating from bitbucket-automation](#migrating-from-bitbucket-automation).
 
 ## What it does
 
 - Detects staged changes, generates a conventional commit message, and commits
 - Pushes the branch (with `-u` if new on remote)
-- Fetches default reviewers and checks for duplicate open PRs via MCP
-- Creates the PR on Bitbucket, or provides a copy-paste fallback if MCP is unavailable
+- Checks for duplicate open PRs and fetches default reviewers (Bitbucket) via MCP
+- Creates the PR on Bitbucket or GitHub, or provides a copy-paste fallback if MCP is unavailable
 - Two modes: **auto** (no confirmations) and **safe** (confirm each step)
 
 ## Prerequisites
@@ -17,21 +19,22 @@ Claude Code plugin — commit staged changes and create Bitbucket pull requests 
 | [Claude Code](https://claude.ai/code) | CLI or desktop app |
 | [`@aashari/mcp-server-atlassian-bitbucket`](https://github.com/aashari/mcp-server-atlassian-bitbucket) | MCP server — handles Bitbucket auth. Plugin works without it but PR creation falls back to copy-paste. |
 | [caveman plugin](https://github.com/JuliusBrussee/caveman) *(optional)* | Provides `caveman-commit` skill for consistent conventional commit generation. Without it, commit messages are generated inline by the model. |
+| GitHub MCP server *(optional)* | For GitHub repos — see [GitHub](#github). Without it, PR creation falls back to a compare URL. |
 | Node.js ≥ 16 | Required for the `check-deps.js` SessionStart hook |
 
 ## Installation
 
 ```bash
-claude plugin marketplace add cess15/claude-bitbucket-automation && claude plugin install bitbucket-automation@bitbucket-automation
+claude plugin marketplace add cess15/claude-pr-automation && claude plugin install pr-automation@pr-automation
 ```
 
 ## Usage
 
 ```
-/bitbucket-workflow              # asks for mode first
-/bitbucket-workflow auto         # execute all steps immediately
-/bitbucket-workflow safe         # confirm each step
-/bitbucket-workflow auto staging # PR to staging instead of develop
+/create-pr              # asks for mode first
+/create-pr auto         # execute all steps immediately
+/create-pr safe         # confirm each step
+/create-pr auto staging # PR to staging instead of develop
 ```
 
 **Default target branch: `develop`.** Never `master` unless you specify it.
@@ -72,8 +75,8 @@ claude mcp add -s user --transport http --client-id <oauth-app-client-id> --clie
 
 | Path | Role |
 |------|------|
-| `commands/bitbucket-workflow.md` | Parses args, asks for mode, runs safe mode inline or delegates auto mode to the agent |
-| `agents/bitbucket-agent.md` | Auto-mode subagent; loads the `pr-workflow` skill |
+| `commands/create-pr.md` | Parses args, asks for mode, runs safe mode inline or delegates auto mode to the agent |
+| `agents/pr-agent.md` | Auto-mode subagent; loads the `pr-workflow` skill |
 | `skills/pr-workflow/SKILL.md` | Shared commit + push + PR workflow (single source of truth) |
 | `skills/pr-workflow/providers/bitbucket.md` | Bitbucket-specific operations: remote parsing, duplicate/reviewer lookup, PR creation, manual fallback |
 | `skills/pr-workflow/providers/github.md` | GitHub operations: remote parsing, template and duplicate lookup, PR creation, compare-URL fallback |
@@ -119,10 +122,33 @@ A server entry is recognised as Bitbucket if its key contains `"bitbucket"` **or
 
 The hook emits two flags into the session context:
 
-- `BITBUCKET_AUTOMATION_MCP=available|unavailable`
-- `BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=available|missing`
+- `PR_AUTOMATION_BITBUCKET_MCP=available|unavailable`
+- `PR_AUTOMATION_CAVEMAN_COMMIT=available|missing`
 
 These flags control fallback behaviour — no extra configuration needed beyond having the MCP server entry present.
+
+## Migrating from bitbucket-automation
+
+v2.0.0 renamed the plugin, its marketplace and repository. Claude Code treats it as a new plugin, so existing installs do not update by themselves:
+
+```bash
+claude plugin uninstall bitbucket-automation@bitbucket-automation
+claude plugin marketplace remove bitbucket-automation
+claude plugin marketplace add cess15/claude-pr-automation
+claude plugin install pr-automation@pr-automation
+```
+
+Then run `/reload-plugins`.
+
+| Before | After |
+|--------|-------|
+| `/bitbucket-workflow` | `/create-pr` |
+| `bitbucket-agent` | `pr-agent` |
+| `BITBUCKET_AUTOMATION_MCP` | `PR_AUTOMATION_BITBUCKET_MCP` |
+| `BITBUCKET_AUTOMATION_GITHUB_MCP` | `PR_AUTOMATION_GITHUB_MCP` |
+| `BITBUCKET_AUTOMATION_CAVEMAN_COMMIT` | `PR_AUTOMATION_CAVEMAN_COMMIT` |
+
+Arguments and modes are unchanged.
 
 ## Hard rules
 

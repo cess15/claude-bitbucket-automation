@@ -1,14 +1,14 @@
 {
-  "name": "bitbucket-automation",
-  "description": "Bitbucket PR automation for Claude Code — commit staged changes and create pull requests via MCP without exposing credentials.",
+  "name": "pr-automation",
+  "description": "Bitbucket and GitHub PR automation for Claude Code — commit staged changes and create pull requests via MCP without exposing credentials.",
   "owner": {
     "name": "Cesar Lata",
     "url": "https://github.com/cess15"
   },
   "plugins": [
     {
-      "name": "bitbucket-automation",
-      "description": "Bitbucket PR automation via MCP. Provides /bitbucket-workflow command (auto/safe modes), bitbucket-agent, and SessionStart dependency check for caveman-commit.",
+      "name": "pr-automation",
+      "description": "Bitbucket and GitHub PR automation via MCP. Provides /create-pr command (auto/safe modes), pr-agent, and a SessionStart dependency check.",
       "source": "./",
       "category": "productivity"
     }
