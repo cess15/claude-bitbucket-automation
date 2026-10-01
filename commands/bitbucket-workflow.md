@@ -28,7 +28,7 @@ Examples:
 
 ## Mode: unset — ask first
 
-If no mode was given, ask the user before doing anything:
+If no mode was given, ask the user before doing anything. Do not run any git command or inspect the working tree before the user picks a mode — the workflow rules (including the ban on bare `git status`/`git diff`) load with the skill.
 
 ```
 Which mode?

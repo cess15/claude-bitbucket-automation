@@ -5,7 +5,8 @@ description: >
   bitbucket-agent. Commits staged changes, pushes the branch and creates the
   PR through the provider file. Invoke with arguments "<mode> <target-branch>"
   where mode is auto, safe or unset.
-allowed-tools: Bash Read mcp__bitbucket__bb_get mcp__bitbucket__bb_post
+allowed-tools: Bash Read mcp__bitbucket__bb_get
+user-invocable: false
 ---
 
 # PR Workflow
