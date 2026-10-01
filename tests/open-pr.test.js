@@ -27,8 +27,9 @@ test('parseInput rejects missing fields, unknown provider and bad host', () => {
 
 test('github plan prefills title and body, encoding branches and text', () => {
   const plan = buildPlan(parseInput(input({ source: "fix/it's-$5&co" })));
-  assert.ok(plan.url.startsWith('https://vumigroup.ghe.com/vumi-it/portal/compare/develop...fix/it\'s-%245%26co?quick_pull=1&title='));
+  assert.ok(plan.url.startsWith('https://vumigroup.ghe.com/vumi-it/portal/compare/develop...fix/it%27s-%245%26co?quick_pull=1&title=feat%28auth%29%3A%20add%20login'));
   assert.ok(plan.url.includes(`&body=${encodeURIComponent('## Summary\nLine with ñ & ?')}`));
+  assert.doesNotMatch(plan.url, /[!'()*\s]/);
   assert.strictEqual(plan.prefilled, 'title,body');
   assert.strictEqual(plan.clipboardText, null);
 });

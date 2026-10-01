@@ -45,20 +45,22 @@ function parseInput(text) {
   return { ...fields, body };
 }
 
-function encodeBranch(branch) {
-  return branch.split('/').map(encodeURIComponent).join('/');
+// encodeURIComponent leaves !'()* as is; terminals end clickable links at
+// those characters, so the rest of a prefilled URL would be lost on click.
+function enc(value) {
+  return encodeURIComponent(value).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 
-function seg(value) {
-  return encodeURIComponent(value);
+function encodeBranch(branch) {
+  return branch.split('/').map(enc).join('/');
 }
 
 // GitHub's compare page accepts quick_pull, title and body as query params.
 function buildGithub(pr) {
-  const base = `https://${pr.host}/${seg(pr.owner)}/${seg(pr.repo)}/compare/`
+  const base = `https://${pr.host}/${enc(pr.owner)}/${enc(pr.repo)}/compare/`
     + `${encodeBranch(pr.target)}...${encodeBranch(pr.source)}?quick_pull=1`
-    + `&title=${encodeURIComponent(pr.title)}`;
-  const full = pr.body ? `${base}&body=${encodeURIComponent(pr.body)}` : base;
+    + `&title=${enc(pr.title)}`;
+  const full = pr.body ? `${base}&body=${enc(pr.body)}` : base;
   if (full.length <= MAX_URL_LENGTH) {
     return { url: full, prefilled: pr.body ? 'title,body' : 'title', clipboardText: null };
   }
@@ -67,8 +69,8 @@ function buildGithub(pr) {
 
 // Bitbucket's new-PR page only takes source and destination branches.
 function buildBitbucket(pr) {
-  const url = `https://${pr.host}/${seg(pr.owner)}/${seg(pr.repo)}/pull-requests/new`
-    + `?source=${encodeURIComponent(pr.source)}&dest=${encodeURIComponent(pr.target)}`;
+  const url = `https://${pr.host}/${enc(pr.owner)}/${enc(pr.repo)}/pull-requests/new`
+    + `?source=${enc(pr.source)}&dest=${enc(pr.target)}`;
   return { url, prefilled: 'none', clipboardText: pr.body || null };
 }
 
