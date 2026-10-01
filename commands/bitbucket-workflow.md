@@ -1,7 +1,7 @@
 ---
-description: Create a Bitbucket PR — commit staged changes and open pull request
+description: Create a Bitbucket or GitHub PR — commit staged changes and open pull request
 argument-hint: [auto|safe] [branch]
-allowed-tools: [Bash, Read, Skill, mcp__bitbucket__bb_get, mcp__bitbucket__bb_post]
+allowed-tools: [Bash, Read, Skill, mcp__bitbucket__bb_get, mcp__bitbucket__bb_post, mcp__github__list_pull_requests, mcp__github__create_pull_request]
 ---
 
 ## Argument parsing

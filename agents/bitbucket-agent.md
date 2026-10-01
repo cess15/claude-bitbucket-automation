@@ -2,7 +2,7 @@
 name: bitbucket-agent
 description: >
   Handles git commits (using caveman-commit skill when available, otherwise
-  inline conventional commit) and creates pull requests on Bitbucket via MCP
+  inline conventional commit) and creates pull requests on Bitbucket or GitHub via MCP
   when configured, otherwise provides a manual copy-paste PR preview.
   If the user has staged changes, commits them first. Then generates a PR
   preview and asks the user to choose a mode before executing: auto (no further
@@ -21,12 +21,14 @@ tools:
   - Skill
   - mcp__bitbucket__bb_get
   - mcp__bitbucket__bb_post
+  - mcp__github__list_pull_requests
+  - mcp__github__create_pull_request
 model: claude-sonnet-4-6
 ---
 
 # Bitbucket PR Agent
 
-Responsibility: run the shared `pr-workflow` skill, which commits staged changes (if any), pushes, and creates the pull request on Bitbucket.
+Responsibility: run the shared `pr-workflow` skill, which commits staged changes (if any), pushes, and creates the pull request on Bitbucket or GitHub.
 
 ## Steps
 
