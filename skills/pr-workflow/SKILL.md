@@ -285,11 +285,13 @@ title=<pr-title>
 PR_AUTOMATION_EOF
 ```
 
-Report from its output lines:
-- `OPENED=yes:*` → `✓ PR form opened in browser: <URL>`; then by `PREFILLED`: `title,body` → `Title and description are filled in — review and click Create.`; `title` → `Title is filled in.`; `none` → print the title for copy-paste.
-- `OPENED=unknown:*` → `PR form sent to the browser: <URL> — if no tab opened, open that URL.` Then report `PREFILLED` as above.
-- `CLIPBOARD=yes:*` → `Description copied to clipboard — paste it into the description field.`
-- `OPENED=no:*`, `CLIPBOARD=no:*` (when a copy was needed) or `ERROR=*` → print the provider's manual template below in full, so nothing is lost.
+Report from its output lines. Show only `SHORT_URL` in chat, never `URL`: long links wrap in the terminal and cannot be clicked.
+- `OPENED=yes:*` → `✓ PR form opened in browser.` Then by `PREFILLED`: `title,body` → `Title and description are filled in — review and click Create.`; `title` → `Title is filled in.`; `none` → print the title for copy-paste.
+- `OPENED=unknown:*` → `PR form sent to the browser — if no tab opened, use the link below.` Then report `PREFILLED` as above.
+- Always end with `Link: <SHORT_URL>`.
+- `CLIPBOARD=yes:*` → `Description copied to clipboard — if the field is empty, paste it (Ctrl+V / Cmd+V).`
+- `OPENED=no:*` with `CLIPBOARD=yes:*` → `Open the link and paste the description.` (title is in the link for GitHub; print it for Bitbucket).
+- `CLIPBOARD=no:*` with `OPENED` not `yes`, or `ERROR=*` → print the provider's manual template below in full, so nothing is lost.
 
 ---
 

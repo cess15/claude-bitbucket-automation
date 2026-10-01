@@ -14,7 +14,7 @@
 //   ---
 //   <pr description, any number of lines>
 //
-// Output: KEY=value lines (URL, PREFILLED, OPENED, CLIPBOARD) for the caller.
+// Output: KEY=value lines (URL, SHORT_URL, PREFILLED, OPENED, CLIPBOARD).
 // Flag --dry-run prints the plan without opening or copying anything.
 
 const { spawnSync } = require('child_process');
@@ -56,22 +56,28 @@ function encodeBranch(branch) {
 }
 
 // GitHub's compare page accepts quick_pull, title and body as query params.
+// The browser gets the full URL; the chat gets the short one, because
+// terminals cannot click a link that wraps over several lines. The body is
+// always copied so the short link only needs a paste.
 function buildGithub(pr) {
-  const base = `https://${pr.host}/${enc(pr.owner)}/${enc(pr.repo)}/compare/`
+  const short = `https://${pr.host}/${enc(pr.owner)}/${enc(pr.repo)}/compare/`
     + `${encodeBranch(pr.target)}...${encodeBranch(pr.source)}?quick_pull=1`
     + `&title=${enc(pr.title)}`;
-  const full = pr.body ? `${base}&body=${enc(pr.body)}` : base;
-  if (full.length <= MAX_URL_LENGTH) {
-    return { url: full, prefilled: pr.body ? 'title,body' : 'title', clipboardText: null };
-  }
-  return { url: base, prefilled: 'title', clipboardText: pr.body };
+  const full = pr.body ? `${short}&body=${enc(pr.body)}` : short;
+  const fits = full.length <= MAX_URL_LENGTH;
+  return {
+    url: fits ? full : short,
+    shortUrl: short,
+    prefilled: fits && pr.body ? 'title,body' : 'title',
+    clipboardText: pr.body || null,
+  };
 }
 
 // Bitbucket's new-PR page only takes source and destination branches.
 function buildBitbucket(pr) {
   const url = `https://${pr.host}/${enc(pr.owner)}/${enc(pr.repo)}/pull-requests/new`
     + `?source=${enc(pr.source)}&dest=${enc(pr.target)}`;
-  return { url, prefilled: 'none', clipboardText: pr.body || null };
+  return { url, shortUrl: url, prefilled: 'none', clipboardText: pr.body || null };
 }
 
 function buildPlan(pr) {
@@ -163,7 +169,7 @@ function main() {
   const plan = buildPlan(pr);
   const env = process.env;
   const release = os.release();
-  const lines = [`URL=${plan.url}`, `PREFILLED=${plan.prefilled}`];
+  const lines = [`URL=${plan.url}`, `SHORT_URL=${plan.shortUrl}`, `PREFILLED=${plan.prefilled}`];
 
   if (dryRun) {
     lines.push('OPENED=no:dry-run');

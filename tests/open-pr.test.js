@@ -31,21 +31,24 @@ test('github plan prefills title and body, encoding branches and text', () => {
   assert.ok(plan.url.includes(`&body=${encodeURIComponent('## Summary\nLine with ñ & ?')}`));
   assert.doesNotMatch(plan.url, /[!'()*\s]/);
   assert.strictEqual(plan.prefilled, 'title,body');
-  assert.strictEqual(plan.clipboardText, null);
+  assert.strictEqual(plan.shortUrl, plan.url.slice(0, plan.url.indexOf('&body=')));
+  assert.strictEqual(plan.clipboardText, '## Summary\nLine with ñ & ?');
 });
 
-test('github plan moves a long body to the clipboard', () => {
+test('github plan drops a long body from the URL but keeps it on the clipboard', () => {
   const body = 'x'.repeat(MAX_URL_LENGTH);
   const plan = buildPlan(parseInput(input({}, body)));
   assert.ok(!plan.url.includes('&body='));
   assert.ok(plan.url.length <= MAX_URL_LENGTH);
   assert.strictEqual(plan.prefilled, 'title');
+  assert.strictEqual(plan.url, plan.shortUrl);
   assert.strictEqual(plan.clipboardText, body);
 });
 
 test('bitbucket plan uses source/dest and always copies the body', () => {
   const plan = buildPlan(parseInput(input({ provider: 'bitbucket', host: 'bitbucket.org', owner: 'vumiteam' })));
   assert.strictEqual(plan.url, 'https://bitbucket.org/vumiteam/portal/pull-requests/new?source=feat%2Flogin&dest=develop');
+  assert.strictEqual(plan.shortUrl, plan.url);
   assert.strictEqual(plan.prefilled, 'none');
   assert.strictEqual(plan.clipboardText, '## Summary\nLine with ñ & ?');
 });
