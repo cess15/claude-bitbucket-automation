@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // bitbucket-automation — SessionStart dependency check
 //
-// Checks: caveman-commit skill availability + Bitbucket MCP configuration.
+// Checks: caveman-commit skill availability + Bitbucket and GitHub MCP configuration.
 // Emits status flags consumed by /bitbucket-workflow command and bitbucket-agent.
 // Non-blocking — workflow continues with fallbacks regardless of results.
 
@@ -47,20 +47,49 @@ function skillExists() {
   return false;
 }
 
-function hasBitbucketMcp(obj) {
-  const servers = obj.mcpServers || {};
-  return Object.entries(servers).some(([key, val]) => {
-    const keyMatch = key.toLowerCase().includes('bitbucket');
-    const serverStr = [val.command, ...(val.args || [])].filter(Boolean).join(' ').toLowerCase();
-    const cmdMatch = serverStr.includes('atlassian-bitbucket');
-    return keyMatch || cmdMatch;
-  });
+function serverString(val) {
+  return [val.command, ...(val.args || []), val.url].filter(Boolean).join(' ').toLowerCase();
 }
 
-function mcpConfigured() {
+function isBitbucketServer(key, val) {
+  return key.toLowerCase().includes('bitbucket') || serverString(val).includes('atlassian-bitbucket');
+}
+
+function isGithubServer(key, val) {
+  const s = serverString(val);
+  return key.toLowerCase().includes('github')
+    || s.includes('githubcopilot.com')
+    || /\.ghe\.com\/mcp/.test(s)
+    || s.includes('github-mcp-server');
+}
+
+// User-scope servers live at the top level; `claude mcp add` without -s stores
+// them per project under projects[<dir>], and -s project writes <dir>/.mcp.json.
+function collectServers(data, projectDir) {
+  const project = (data.projects && data.projects[projectDir]) || {};
+  return { ...(data.mcpServers || {}), ...(project.mcpServers || {}) };
+}
+
+// Remote GitHub MCP endpoints map to the git host they serve:
+// api.githubcopilot.com -> github.com, copilot-api.<sub>.ghe.com -> <sub>.ghe.com.
+function githubHost(val) {
+  let host;
+  try { host = new URL(val.url).hostname.toLowerCase(); } catch (e) { return 'unknown'; }
+  if (host === 'api.githubcopilot.com') return 'github.com';
+  const ghe = host.match(/^copilot-api\.([a-z0-9-]+)\.ghe\.com$/);
+  return ghe ? `${ghe[1]}.ghe.com` : 'unknown';
+}
+
+function findServer(servers, predicate) {
+  const hit = Object.entries(servers).find(([key, val]) => predicate(key, val || {}));
+  return hit ? hit[0] : null;
+}
+
+function configuredServers(projectDir) {
   const candidates = [
     path.join(claudeDir, 'settings.json'),   // ~/.claude/settings.json
     path.join(os.homedir(), '.claude.json'), // ~/.claude.json (Linux/Mac)
+    path.join(projectDir, '.mcp.json'),      // project-scoped servers
   ];
 
   // Windows home via USERPROFILE (available in WSL when inherited from Windows)
@@ -68,32 +97,50 @@ function mcpConfigured() {
     candidates.push(path.join(process.env.USERPROFILE, '.claude.json'));
   }
 
+  let servers = {};
   for (const p of candidates) {
     try {
       if (!fs.existsSync(p)) continue;
       const data = JSON.parse(fs.readFileSync(p, 'utf8'));
-      if (hasBitbucketMcp(data)) return true;
+      servers = { ...servers, ...collectServers(data, projectDir) };
     } catch (e) {
       // Unreadable or invalid JSON — skip
     }
   }
-  return false;
+  return servers;
 }
 
-const lines = [];
+function main() {
+  const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+  const servers = configuredServers(projectDir);
+  const bitbucket = findServer(servers, isBitbucketServer);
+  const github = findServer(servers, isGithubServer);
+  const githubServerHost = github ? githubHost(servers[github]) : null;
+  const lines = [];
 
-if (!skillExists()) {
-  lines.push('BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=missing');
-  lines.push('bitbucket-automation: caveman-commit skill not found — commit messages will be generated inline by the model (higher token cost, less consistency). To optimize: claude plugin install caveman@caveman');
-} else {
-  lines.push('BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=available');
+  if (!skillExists()) {
+    lines.push('BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=missing');
+    lines.push('bitbucket-automation: caveman-commit skill not found — commit messages will be generated inline by the model (higher token cost, less consistency). To optimize: claude plugin install caveman@caveman');
+  } else {
+    lines.push('BITBUCKET_AUTOMATION_CAVEMAN_COMMIT=available');
+  }
+
+  if (!bitbucket) {
+    lines.push('BITBUCKET_AUTOMATION_MCP=unavailable');
+    lines.push('bitbucket-automation: Bitbucket MCP not configured — PR will be shown as a manual preview (copy-paste). Reviewers and duplicate PR checks will be skipped.');
+  } else {
+    lines.push('BITBUCKET_AUTOMATION_MCP=available');
+  }
+
+  if (!github) {
+    lines.push('BITBUCKET_AUTOMATION_GITHUB_MCP=unavailable');
+  } else {
+    lines.push(`BITBUCKET_AUTOMATION_GITHUB_MCP=available:${github}@${githubServerHost}`);
+  }
+
+  console.log(lines.join('\n'));
 }
 
-if (!mcpConfigured()) {
-  lines.push('BITBUCKET_AUTOMATION_MCP=unavailable');
-  lines.push('bitbucket-automation: Bitbucket MCP not configured — PR will be shown as a manual preview (copy-paste). Reviewers and duplicate PR checks will be skipped.');
-} else {
-  lines.push('BITBUCKET_AUTOMATION_MCP=available');
-}
+if (require.main === module) main();
 
-console.log(lines.join('\n'));
+module.exports = { isBitbucketServer, isGithubServer, collectServers, findServer, githubHost };
