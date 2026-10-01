@@ -65,7 +65,8 @@ claude mcp add -s user --transport http --client-id <oauth-app-client-id> --clie
 - Name the server `github`: the agent and command grant `mcp__github__*` tools by that name.
 - GitHub's OAuth server does not support dynamic client registration, so an OAuth App (callback `http://localhost:8765/callback`) is required; organizations with OAuth App restrictions must approve it.
 - The MCP server only serves its own host; for an `origin` on another host the plugin uses the compare URL.
-- Reviewers come from `CODEOWNERS`; a committed `pull_request_template.md` shapes the description.
+- Reviewers come from `CODEOWNERS` (add one per repo; without it no reviewers are requested); a committed `pull_request_template.md` shapes the description.
+- After creation the PR is assigned to its author and labeled from the title type: `feat` → `enhancement`, `fix` → `bug`, `docs` → `documentation` (skipped if the label does not exist).
 
 ## Structure
 
