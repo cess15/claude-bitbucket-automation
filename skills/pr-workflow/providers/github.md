@@ -124,6 +124,8 @@ Report: `✓ Assigned: <login> · Labels: <label or none>`. Any failure here is 
 
 ## manual_fallback
 
+First run the **PR page opener** from SKILL.md with `provider=github`, `host=<host>`, `owner=<owner>`, `repo=<repo>`, and report from its output. Print the template below only when the opener says so (or failed).
+
 Header: `PR ready — create it manually:` (or, after an MCP error: `The GitHub MCP tool returned an error. Create the PR manually:`)
 
 ```

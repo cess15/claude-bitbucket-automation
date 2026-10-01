@@ -67,9 +67,23 @@ claude mcp add -s user --transport http --client-id <oauth-app-client-id> --clie
 
 - Name the server `github`: the agent and command grant `mcp__github__*` tools by that name.
 - GitHub's OAuth server does not support dynamic client registration, so an OAuth App (callback `http://localhost:8765/callback`) is required; organizations with OAuth App restrictions must approve it.
-- The MCP server only serves its own host; for an `origin` on another host the plugin uses the compare URL.
+- The MCP server only serves its own host; for an `origin` on another host the plugin falls back to the browser.
+- Fallback (no MCP, other host, or MCP error): the new-PR page opens in the browser with title and description prefilled, the description is copied to the clipboard, and a short clickable link is printed. Without a browser or clipboard, title and description are printed for copy-paste.
 - Reviewers come from `CODEOWNERS` (add one per repo; without it no reviewers are requested); a committed `pull_request_template.md` shapes the description.
 - After creation the PR is assigned to its author and labeled from the title type: `feat` → `enhancement`, `fix` → `bug`, `docs` → `documentation` (skipped if the label does not exist).
+
+## Browser and clipboard fallback
+
+When the PR cannot be created through MCP, `open-pr.js` opens the new-PR page, copies the description to the clipboard, and prints a short link (title only) that can be clicked from the terminal — full prefilled URLs wrap over several lines and terminals cannot click them. The copy replaces whatever was on the clipboard.
+
+| OS | Opens browser with | Copies with | Notes |
+|----|--------------------|-------------|-------|
+| WSL / Windows | `rundll32 url.dll,FileProtocolHandler` | `clip.exe` | Nothing to install |
+| macOS | `open` | `pbcopy` | Nothing to install |
+| Linux desktop | `xdg-open` | `wl-copy` (Wayland), `xclip` or `xsel` (X11) | Debian/Ubuntu: `sudo apt install wl-clipboard` or `sudo apt install xclip` |
+| Linux without display (SSH) | — | — | URL and copy-paste text are printed |
+
+GitHub takes title and description in the URL, so the auto-opened form is filled in; from the short link, paste the description. Bitbucket only takes the branches, so paste the description there.
 
 ## Structure
 
@@ -80,6 +94,7 @@ claude mcp add -s user --transport http --client-id <oauth-app-client-id> --clie
 | `skills/pr-workflow/SKILL.md` | Shared commit + push + PR workflow (single source of truth) |
 | `skills/pr-workflow/providers/bitbucket.md` | Bitbucket-specific operations: remote parsing, duplicate/reviewer lookup, PR creation, manual fallback |
 | `skills/pr-workflow/providers/github.md` | GitHub operations: remote parsing, template and duplicate lookup, PR creation, compare-URL fallback |
+| `skills/pr-workflow/scripts/open-pr.js` | Fallback: opens the new-PR page prefilled and copies the description to the clipboard (WSL, Windows, macOS, Linux) |
 | `hooks/check-deps.js` | SessionStart dependency check |
 
 ## MCP configuration
