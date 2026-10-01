@@ -72,6 +72,19 @@ claude mcp add -s user --transport http --client-id <oauth-app-client-id> --clie
 - Reviewers come from `CODEOWNERS` (add one per repo; without it no reviewers are requested); a committed `pull_request_template.md` shapes the description.
 - After creation the PR is assigned to its author and labeled from the title type: `feat` → `enhancement`, `fix` → `bug`, `docs` → `documentation` (skipped if the label does not exist).
 
+## Browser and clipboard fallback
+
+When the PR cannot be created through MCP, `open-pr.js` opens the new-PR page and the URL is always printed, so it can also be clicked from the terminal.
+
+| OS | Opens browser with | Copies with | Notes |
+|----|--------------------|-------------|-------|
+| WSL / Windows | `rundll32 url.dll,FileProtocolHandler` | `clip.exe` | Nothing to install |
+| macOS | `open` | `pbcopy` | Nothing to install |
+| Linux desktop | `xdg-open` | `wl-copy` (Wayland), `xclip` or `xsel` (X11) | Debian/Ubuntu: `sudo apt install wl-clipboard` or `sudo apt install xclip` |
+| Linux without display (SSH) | — | — | URL and copy-paste text are printed |
+
+GitHub takes title and description in the URL, so the form opens filled in. Bitbucket only takes the branches, so its description goes to the clipboard.
+
 ## Structure
 
 | Path | Role |
