@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const {
-  MAX_URL_LENGTH, parseInput, buildPlan, openerCandidates, clipboardCandidates, toClipExeBuffer,
+  MAX_URL_LENGTH, parseInput, buildPlan, openerCandidates, clipboardCandidates, toClipExeBuffer, openUrl,
 } = require('../skills/pr-workflow/scripts/open-pr.js');
 
 const input = (overrides = {}, body = '## Summary\nLine with ñ & ?') => {
@@ -50,9 +50,10 @@ test('bitbucket plan uses source/dest and always copies the body', () => {
 });
 
 test('opener per platform', () => {
+  const browser = [['rundll32.exe', 'url.dll,FileProtocolHandler']];
   const wsl = openerCandidates('linux', { WSL_DISTRO_NAME: 'Ubuntu' }, '6.6.87.2-microsoft-standard-WSL2');
-  assert.deepStrictEqual(wsl, [['wslview'], ['explorer.exe']]);
-  assert.deepStrictEqual(openerCandidates('win32', {}, ''), [['explorer.exe']]);
+  assert.deepStrictEqual(wsl, browser);
+  assert.deepStrictEqual(openerCandidates('win32', {}, ''), browser);
   assert.deepStrictEqual(openerCandidates('darwin', {}, ''), [['open']]);
   assert.deepStrictEqual(openerCandidates('linux', { DISPLAY: ':0' }, '6.1.0'), [['xdg-open']]);
   assert.deepStrictEqual(openerCandidates('linux', {}, '6.1.0'), []);
@@ -70,4 +71,14 @@ test('clip.exe buffer is UTF-16LE with CRLF and no BOM', () => {
   const buf = toClipExeBuffer('ñ\nb');
   assert.notDeepStrictEqual([...buf.subarray(0, 2)], [0xff, 0xfe]);
   assert.strictEqual(buf.toString('utf16le'), 'ñ\r\nb');
+});
+
+test('openUrl falls through missing binaries and flags uncertain rundll32 exits', () => {
+  const win = openerCandidates('win32', {}, '');
+  const linux = [['missing-opener'], ['xdg-open']];
+  const missingFirst = (cmd) => (cmd[0] === 'missing-opener' ? { ok: false, reason: 'ENOENT' } : { ok: true, status: 0 });
+  assert.strictEqual(openUrl('u', linux, missingFirst), 'yes:xdg-open');
+  assert.strictEqual(openUrl('u', win, () => ({ ok: true, status: 1 })), 'unknown:rundll32.exe-exit-1');
+  assert.strictEqual(openUrl('u', [['xdg-open']], () => ({ ok: true, status: 3 })), 'no:xdg-open-exit-3');
+  assert.strictEqual(openUrl('u', [], missingFirst), 'no:no-display');
 });

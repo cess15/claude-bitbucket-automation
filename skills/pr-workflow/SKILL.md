@@ -287,6 +287,7 @@ PR_AUTOMATION_EOF
 
 Report from its output lines:
 - `OPENED=yes:*` → `✓ PR form opened in browser: <URL>`; then by `PREFILLED`: `title,body` → `Title and description are filled in — review and click Create.`; `title` → `Title is filled in.`; `none` → print the title for copy-paste.
+- `OPENED=unknown:*` → `PR form sent to the browser: <URL> — if no tab opened, open that URL.` Then report `PREFILLED` as above.
 - `CLIPBOARD=yes:*` → `Description copied to clipboard — paste it into the description field.`
 - `OPENED=no:*`, `CLIPBOARD=no:*` (when a copy was needed) or `ERROR=*` → print the provider's manual template below in full, so nothing is lost.
 

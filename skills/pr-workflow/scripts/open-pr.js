@@ -84,10 +84,13 @@ function hasDisplay(env) {
   return Boolean(env.DISPLAY || env.WAYLAND_DISPLAY);
 }
 
+// explorer.exe treats long or query-heavy URLs as paths and opens File
+// Explorer; FileProtocolHandler hands the URL straight to the default browser.
+const WINDOWS_OPENER = ['rundll32.exe', 'url.dll,FileProtocolHandler'];
+
 // Candidates are tried in order; a missing binary (ENOENT) moves to the next.
 function openerCandidates(platform, env, release) {
-  if (isWsl(platform, env, release)) return [['wslview'], ['explorer.exe']];
-  if (platform === 'win32') return [['explorer.exe']];
+  if (isWsl(platform, env, release) || platform === 'win32') return [WINDOWS_OPENER];
   if (platform === 'darwin') return [['open']];
   if (platform === 'linux' && hasDisplay(env)) return [['xdg-open']];
   return [];
@@ -121,14 +124,15 @@ function run(cmd, input) {
   return { ok: true, status: res.status };
 }
 
-function openUrl(url, candidates) {
+function openUrl(url, candidates, runner = run) {
   if (candidates.length === 0) return 'no:no-display';
   for (const cmd of candidates) {
-    const res = run([...cmd, url]);
+    const res = runner([...cmd, url]);
     if (res.reason === 'ENOENT') continue;
     if (!res.ok) return `no:${res.reason}`;
-    // explorer.exe exits 1 even after opening the URL.
-    if (res.status === 0 || cmd[0] === 'explorer.exe') return `yes:${cmd[0]}`;
+    if (res.status === 0) return `yes:${cmd[0]}`;
+    // rundll32 sometimes exits 1 after the browser has opened the URL.
+    if (cmd === WINDOWS_OPENER) return `unknown:${cmd[0]}-exit-${res.status}`;
     return `no:${cmd[0]}-exit-${res.status}`;
   }
   return 'no:no-opener';
@@ -172,5 +176,5 @@ function main() {
 if (require.main === module) main();
 
 module.exports = {
-  MAX_URL_LENGTH, parseInput, buildPlan, openerCandidates, clipboardCandidates, toClipExeBuffer,
+  MAX_URL_LENGTH, parseInput, buildPlan, openerCandidates, clipboardCandidates, toClipExeBuffer, openUrl,
 };
