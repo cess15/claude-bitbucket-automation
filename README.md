@@ -4,6 +4,8 @@ Claude Code plugin — commit staged changes and create Bitbucket or GitHub pull
 
 Formerly **bitbucket-automation** — see [Migrating from bitbucket-automation](#migrating-from-bitbucket-automation).
 
+New here? Follow [docs/getting-started.md](docs/getting-started.md).
+
 ## What it does
 
 - Detects staged changes, generates a conventional commit message, and commits
