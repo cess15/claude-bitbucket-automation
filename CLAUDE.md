@@ -17,9 +17,11 @@ components below. A rule written only here does not reach plugin users.
 | `skills/pr-workflow/providers/<provider>.md` | yes | Provider operations: `parse_remote`, `prefetch`, `create_pr`, `manual_fallback` |
 | `commands/create-pr.md` | yes | Parses `[auto\|safe] [branch]`, asks for mode, runs safe mode inline, delegates auto mode to the agent |
 | `agents/pr-agent.md` | yes | Auto-mode subagent; loads `pr-automation:pr-workflow` |
-| `hooks/check-deps.js` | yes | SessionStart check; emits `PR_AUTOMATION_BITBUCKET_MCP` and `PR_AUTOMATION_CAVEMAN_COMMIT` |
+| `skills/pr-workflow/scripts/open-pr.js` | yes | Fallback opener: builds the new-PR URL, opens the browser, copies the description |
+| `hooks/check-deps.js` | yes | SessionStart check; emits `PR_AUTOMATION_BITBUCKET_MCP`, `PR_AUTOMATION_GITHUB_MCP` (`available:<server>@<host>`) and `PR_AUTOMATION_CAVEMAN_COMMIT` |
 | `.claude-plugin/plugin.json`, `marketplace.json` | yes | Manifest and marketplace entry |
-| `CLAUDE.md`, `README.md` | no | Development guide and user docs |
+| `CLAUDE.md`, `README.md`, `docs/` | no | Development guide and user docs |
+| `tests/` | no | `node --test` suites for the hook and the opener |
 
 - Change shared behavior in `SKILL.md`, never in the command or agent.
 - Keep the command and agent thin: mode and target-branch parsing, then invoke the skill.
@@ -45,6 +47,7 @@ claude -p --plugin-dir /path/to/pr-automation "<prompt>"
 
 - Check registration: ask it to list skills and agents containing `pr-workflow` or `bitbucket`.
 - Run a flow end to end only with `/create-pr` and no mode: it stops at the plan without committing, pushing or creating a PR.
+- `node --test` runs the unit tests; run it before every commit that touches `hooks/` or `scripts/`.
 - `claude plugin validate .` validates the marketplace manifest.
 
 ---
@@ -53,4 +56,5 @@ claude -p --plugin-dir /path/to/pr-automation "<prompt>"
 
 - PRs for this repo target `main` (it has no `develop`). The plugin's own default target for users stays `develop`.
 - Commits follow Conventional Commits and carry no AI attribution.
-- Commits are GPG-signed with Windows `gpg.exe`; signing fails from WSL, so commit from Windows Git.
+- Commits are GPG-signed with Windows `gpg.exe`; signing fails with WSL git, so commit with Windows `git.exe` (it can be called from WSL).
+- The repository is public: keep company hosts, organization names and credentials out of it; use placeholders such as `<subdomain>.ghe.com`.
