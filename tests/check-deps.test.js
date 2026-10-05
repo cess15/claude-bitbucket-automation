@@ -31,14 +31,14 @@ test('merges user-scope and current-project servers only', () => {
 });
 
 test('findServer returns the configured server name', () => {
-  const servers = { Snyk: {}, 'vumi-github': { url: 'https://copilot-api.example.ghe.com/mcp/' } };
-  assert.strictEqual(findServer(servers, isGithubServer), 'vumi-github');
+  const servers = { Snyk: {}, 'work-github': { url: 'https://copilot-api.example.ghe.com/mcp/' } };
+  assert.strictEqual(findServer(servers, isGithubServer), 'work-github');
   assert.strictEqual(findServer({}, isGithubServer), null);
 });
 
 test('githubHost maps remote MCP endpoints to their git host', () => {
   assert.strictEqual(githubHost({ url: 'https://api.githubcopilot.com/mcp/' }), 'github.com');
-  assert.strictEqual(githubHost({ url: 'https://copilot-api.vumigroup.ghe.com/mcp/' }), 'vumigroup.ghe.com');
+  assert.strictEqual(githubHost({ url: 'https://copilot-api.example.ghe.com/mcp/' }), 'example.ghe.com');
   assert.strictEqual(githubHost({ command: 'github-mcp-server' }), 'unknown');
   assert.strictEqual(githubHost({ url: 'https://evil.example.com/copilot-api.x.ghe.com/mcp' }), 'unknown');
 });

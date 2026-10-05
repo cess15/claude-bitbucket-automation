@@ -6,7 +6,7 @@ const {
 
 const input = (overrides = {}, body = '## Summary\nLine with ñ & ?') => {
   const fields = {
-    provider: 'github', host: 'vumigroup.ghe.com', owner: 'vumi-it', repo: 'portal',
+    provider: 'github', host: 'example.ghe.com', owner: 'acme', repo: 'portal',
     source: 'feat/login', target: 'develop', title: 'feat(auth): add login', ...overrides,
   };
   return `${Object.entries(fields).map(([k, v]) => `${k}=${v}`).join('\n')}\n---\n${body}\n`;
@@ -27,7 +27,7 @@ test('parseInput rejects missing fields, unknown provider and bad host', () => {
 
 test('github plan prefills title and body, encoding branches and text', () => {
   const plan = buildPlan(parseInput(input({ source: "fix/it's-$5&co" })));
-  assert.ok(plan.url.startsWith('https://vumigroup.ghe.com/vumi-it/portal/compare/develop...fix/it%27s-%245%26co?quick_pull=1&title=feat%28auth%29%3A%20add%20login'));
+  assert.ok(plan.url.startsWith('https://example.ghe.com/acme/portal/compare/develop...fix/it%27s-%245%26co?quick_pull=1&title=feat%28auth%29%3A%20add%20login'));
   assert.ok(plan.url.includes(`&body=${encodeURIComponent('## Summary\nLine with ñ & ?')}`));
   assert.doesNotMatch(plan.url, /[!'()*\s]/);
   assert.strictEqual(plan.prefilled, 'title,body');
@@ -46,8 +46,8 @@ test('github plan drops a long body from the URL but keeps it on the clipboard',
 });
 
 test('bitbucket plan uses source/dest and always copies the body', () => {
-  const plan = buildPlan(parseInput(input({ provider: 'bitbucket', host: 'bitbucket.org', owner: 'vumiteam' })));
-  assert.strictEqual(plan.url, 'https://bitbucket.org/vumiteam/portal/pull-requests/new?source=feat%2Flogin&dest=develop');
+  const plan = buildPlan(parseInput(input({ provider: 'bitbucket', host: 'bitbucket.org', owner: 'acme-team' })));
+  assert.strictEqual(plan.url, 'https://bitbucket.org/acme-team/portal/pull-requests/new?source=feat%2Flogin&dest=develop');
   assert.strictEqual(plan.shortUrl, plan.url);
   assert.strictEqual(plan.prefilled, 'none');
   assert.strictEqual(plan.clipboardText, '## Summary\nLine with ñ & ?');
