@@ -47,11 +47,18 @@ Otherwise wait for the reply, then proceed with the chosen mode below.
 
 ## Mode: AUTO — delegate to agent
 
-Invoke the `pr-automation:pr-agent` Agent with this prompt (fill in the real `<TARGET>`):
+Invoke the `pr-automation:pr-agent` Agent with this prompt. Fill in the real `<TARGET>` and copy each `PR_AUTOMATION_*` line verbatim from this session's SessionStart context; write `absent` for a flag that is not there:
 
 ```
 Create a pull request from the current branch to <TARGET>. Mode is pre-set to: AUTO — execute all steps immediately without confirmation.
+
+Session flags:
+PR_AUTOMATION_BITBUCKET_MCP=<value>
+PR_AUTOMATION_GITHUB_MCP=<value>
+PR_AUTOMATION_CAVEMAN_COMMIT=<value>
 ```
+
+A subagent starts with an empty context and never sees the SessionStart hook output, so the flags must travel in the prompt.
 
 Do not do any git work yourself. The agent handles everything.
 

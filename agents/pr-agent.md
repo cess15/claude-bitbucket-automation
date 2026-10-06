@@ -40,7 +40,8 @@ Responsibility: run the shared `pr-workflow` skill, which commits staged changes
    - contains "Mode is pre-set to: NORMAL" → `safe`
    - otherwise → `unset`
 2. Determine `<target-branch>` from the prompt only (e.g. "PR to staging" → `staging`). If absent, use `develop`. Never `master`, never detect it via API or git.
-3. Invoke the Skill tool with skill `pr-automation:pr-workflow` and args `<mode> <target-branch>`, then follow the loaded instructions exactly.
+3. Keep the `Session flags:` block of the prompt: the skill reads `PR_AUTOMATION_*` values from it, since this agent never sees the SessionStart hook output.
+4. Invoke the Skill tool with skill `pr-automation:pr-workflow` and args `<mode> <target-branch>`, then follow the loaded instructions exactly.
 
 Do not do any git or MCP work before the skill is loaded.
 
