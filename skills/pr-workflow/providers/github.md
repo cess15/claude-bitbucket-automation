@@ -6,7 +6,8 @@ and GitHub Enterprise Cloud hosts (`*.ghe.com`).
 ## MCP tools
 
 GitHub MCP server (remote `https://api.githubcopilot.com/mcp/`, or
-`https://copilot-api.<subdomain>.ghe.com/mcp/` for GHE.com). Tools used:
+`https://copilot-api.<subdomain>.ghe.com/mcp/` for GHE.com). These URLs are
+examples only: the server host comes from the flag below, never from this list. Tools used:
 
 ```
 mcp__github__list_pull_requests   → find an open PR for the same head/base
@@ -16,7 +17,7 @@ mcp__github__get_label            → check a label exists before applying it
 mcp__github__issue_write          → set assignee and labels on the created PR
 ```
 
-MCP availability comes from the session context flag `PR_AUTOMATION_GITHUB_MCP`:
+MCP availability comes from the flag `PR_AUTOMATION_GITHUB_MCP`, resolved as described in Session flags in SKILL.md:
 - `available:<server-name>@<server-host>` → tools are `mcp__<server-name>__list_pull_requests` / `mcp__<server-name>__create_pull_request`
 - `unavailable` → no API calls; use **manual_fallback**
 

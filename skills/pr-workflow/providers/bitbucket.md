@@ -21,7 +21,7 @@ All paths relative (start with `/repositories/`). `/2.0` prefix added automatica
 
 **Token optimization — always use `jq` to filter responses.** Default TOON format uses 30–60% fewer tokens than JSON — keep as default. Always pass `jq` expression to extract only needed fields. Never request full response without `jq` filter.
 
-MCP availability comes from the session context flag `PR_AUTOMATION_BITBUCKET_MCP` (`available` | `unavailable`), emitted by the plugin's SessionStart hook.
+MCP availability comes from the flag `PR_AUTOMATION_BITBUCKET_MCP` (`available` | `unavailable`), resolved as described in Session flags in SKILL.md.
 
 ---
 

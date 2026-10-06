@@ -31,6 +31,20 @@ Provider-specific operations (`parse_remote`, `prefetch`, `create_pr`, `manual_f
 
 Read the selected file once and use it wherever a step says "provider".
 
+### Session flags
+
+The plugin's SessionStart hook emits `PR_AUTOMATION_BITBUCKET_MCP`, `PR_AUTOMATION_GITHUB_MCP` and `PR_AUTOMATION_CAVEMAN_COMMIT`. Read each one from the session context or, when running as a subagent, from the `Session flags:` block of the prompt.
+
+When a flag is in neither place (or is `absent`), resolve it as follows — never infer a value from the example URLs in the provider files:
+
+| Flag | Value when absent |
+|------|-------------------|
+| `PR_AUTOMATION_CAVEMAN_COMMIT` | `missing` |
+| `PR_AUTOMATION_BITBUCKET_MCP` | `available` if `mcp__bitbucket__bb_get` is in your tool list, else `unavailable` |
+| `PR_AUTOMATION_GITHUB_MCP` | `available:github@unknown` if `mcp__github__create_pull_request` is in your tool list, else `unavailable` |
+
+A wrong guess is safe: an MCP call that fails falls back to the provider's **manual_fallback**.
+
 ---
 
 ## ⚠️ Hard Rules
@@ -96,7 +110,7 @@ Apply provider **prefetch**. It sets `<existing-pr>`, `<reviewers>` and, when th
 
 ## Step 3 — Generate commit message (only if staged changes exist)
 
-Check session context for `PR_AUTOMATION_CAVEMAN_COMMIT`:
+Check `PR_AUTOMATION_CAVEMAN_COMMIT` (see Session flags):
 
 - **`available`** → invoke caveman-commit skill to generate the message from `git diff --cached`
 - **`missing`** → generate inline from the diff:

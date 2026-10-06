@@ -1,7 +1,7 @@
 {
   "name": "pr-automation",
   "description": "Bitbucket and GitHub PR automation for Claude Code. Commits staged changes and creates pull requests via MCP. Provides /create-pr command (auto/safe modes) and pr-agent. Uses the caveman plugin for commit messages when installed.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": {
     "name": "Cesar Lata",
     "url": "https://github.com/cess15/"
